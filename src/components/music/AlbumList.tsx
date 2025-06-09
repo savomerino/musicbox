@@ -1,7 +1,7 @@
 import styles from './AlbumList.module.css';
 import Container from '../common/Container';
 import AlbumCard from './AlbumCard';
-import { Album } from '../../data/albums'; 
+import type { Album } from '../../data/albums'; 
 
 interface Props {
   title: string;

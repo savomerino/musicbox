@@ -1,6 +1,5 @@
 import styles from './AlbumCard.module.css';
-import type { Album } from '../../data/albums'; // Ruta relativa correcta
- // Ruta relativa correcta
+import type { Album } from '../../data/albums'; 
 
 interface Props {
   album: Album;
