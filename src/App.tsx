@@ -1,62 +1,62 @@
-import { useState } from 'react';
-
-import { type Album, mockAlbums } from './data/albums'; 
-import AlbumList from './components/music/AlbumList';
-import SearchBar from './components/SearchBar';
-import Player from './components/Player';
+import React, { useState, Suspense, lazy } from 'react';
+import { Routes, Route, Link } from 'react-router-dom';
 import './App.css';
 
-// URL del audio 
-const AUDIO_URL = "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3";
+// 1. Importamos las páginas usando lazy para optimizar la carga
+const HomePage = lazy(() => import('./pages/HomePage'));
+const DetailPage = lazy(() => import('./pages/DetailPage'));
+const FavoritesPage = lazy(() => import('./pages/FavoritesPage')); 
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));  
 
 function App() {
-    // useState para manejar la lista de álbumes filtrada y el album actual.
-  // Inicializamos la lista con los albumes.
-  const [filteredAlbums, setFilteredAlbums] = useState<Album[]>(mockAlbums);
-  const [currentAlbum, setCurrentAlbum] = useState<Album | null>(null);
+  // 2. "Elevamos el estado" de los favoritos a App.tsx
+  // Así, tanto DetailPage como FavoritesPage pueden acceder a él.
+  const [favorites, setFavorites] = useState<string[]>([]);
 
-  // --- MANEJADORES ---
-  const handleSearch = (searchTerm: string) => {
-    const lowerCaseTerm = searchTerm.toLowerCase();
-    
-    // Usamos .filter(), un método de array que devuelve un nuevo array
-    // Esto es inmutable, como se recomienda en React.
-    const filtered = mockAlbums.filter(album =>
-      album.albumName.toLowerCase().includes(lowerCaseTerm)
-    );
-    
-    setFilteredAlbums(filtered);
+  // 3. Lógica para agregar o quitar un álbum de favoritos
+  const handleToggleFavorite = (albumId: string) => {
+    setFavorites(prevFavorites => {
+      // Si el id ya está, lo quitamos (creando un nuevo array)
+      if (prevFavorites.includes(albumId)) {
+        return prevFavorites.filter(id => id !== albumId);
+      }
+      // Si no está, lo agregamos (creando un nuevo array)
+      return [...prevFavorites, albumId];
+    });
   };
 
-  const handleAlbumSelect = (album: Album) => {
-    setCurrentAlbum(album);
-  };
-
-  // --- RENDERIZADO ---
   return (
-    <>
-      <header className="app-header">
-        <h1>MusicBox - V. 2.0</h1>
-        <SearchBar onSearch={handleSearch} />
-      </header>
-      
-      <main>
-        {/* Pasamos los álbumes filtrados y el manejador como props. */}
-        <AlbumList albums={filteredAlbums} onAlbumSelect={handleAlbumSelect} />
-      </main>
+    <div className="app-container">
+      {/* 4. Menú de navegación simple y persistente */}
+      <nav className="main-nav">
+        <Link to="/">Inicio</Link>
+        <Link to="/favoritos">Favoritos ({favorites.length})</Link>
+      </nav>
 
-      {/* Usamos el operador lógico AND (&&) para renderizado condicional /}
-      {/* Si `currentAlbum` es "truthy", el Player se muestra /}
-      {/* La prop "key" al cambiar, fuerza a React a crear una nueva */}
-      {/* instancia del Player, reseteando su estado  */}
-      {currentAlbum && (
-        <Player 
-          key={currentAlbum.id} 
-          album={currentAlbum} 
-          audioUrl={AUDIO_URL} 
-        />
-      )}
-    </>
+      {/* 5. Suspense para mostrar un "cargando" mientras se descarga el código de la página */}
+      <Suspense fallback={<div className="loading">Cargando página...</div>}>
+        {/* 6. El componente <Routes> decide qué página mostrar según la URL */}
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          
+          <Route 
+            path="/song/:id" 
+            element={<DetailPage favorites={favorites} onToggleFavorite={handleToggleFavorite} />} 
+          />
+          
+          <Route 
+            path="/favoritos" 
+            element={<FavoritesPage favoriteIds={favorites} />} 
+          />
+
+          {/* Puedes agregar la ruta de categoría aquí cuando la crees */}
+          {/* <Route path="/category/:id" element={<CategoryPage />} /> */}
+          
+          {/* Ruta para cualquier otra URL (404 Not Found) */}
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Suspense>
+    </div>
   );
 }
 
