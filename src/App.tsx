@@ -1,62 +1,50 @@
-import { useState } from 'react';
-
-import { type Album, mockAlbums } from './data/albums'; 
-import AlbumList from './components/music/AlbumList';
-import SearchBar from './components/SearchBar';
+import { useState, Suspense, lazy } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import styles from './App.module.css';
+import Navbar from './components/layout/Navbar';
 import Player from './components/Player';
-import './App.css';
+import type { Album } from './data/albums';
 
-// URL del audio 
+// Lazy loading para las páginas
+const HomePage = lazy(() => import('./pages/HomePage'));
+const DetailPage = lazy(() => import('./pages/DetailPage'));
+// Aún no hemos creado estas, pero las definimos para el futuro
+// const FavoritesPage = lazy(() => import('./pages/FavoritesPage'));
+// const CategoryPage = lazy(() => import('./pages/CategoryPage'));
+// const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+
 const AUDIO_URL = "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3";
 
 function App() {
-    // useState para manejar la lista de álbumes filtrada y el album actual.
-  // Inicializamos la lista con los albumes.
-  const [filteredAlbums, setFilteredAlbums] = useState<Album[]>(mockAlbums);
   const [currentAlbum, setCurrentAlbum] = useState<Album | null>(null);
-
-  // --- MANEJADORES ---
-  const handleSearch = (searchTerm: string) => {
-    const lowerCaseTerm = searchTerm.toLowerCase();
-    
-    // Usamos .filter(), un método de array que devuelve un nuevo array
-    // Esto es inmutable, como se recomienda en React.
-    const filtered = mockAlbums.filter(album =>
-      album.albumName.toLowerCase().includes(lowerCaseTerm)
-    );
-    
-    setFilteredAlbums(filtered);
-  };
 
   const handleAlbumSelect = (album: Album) => {
     setCurrentAlbum(album);
   };
 
-  // --- RENDERIZADO ---
   return (
-    <>
-      <header className="app-header">
-        <h1>MusicBox - V. 2.0</h1>
-        <SearchBar onSearch={handleSearch} />
-      </header>
-      
-      <main>
-        {/* Pasamos los álbumes filtrados y el manejador como props. */}
-        <AlbumList albums={filteredAlbums} onAlbumSelect={handleAlbumSelect} />
+    <div className={styles.app}>
+      <Navbar />
+      <main style={{ paddingBottom: '80px' }}> {/* Espacio para el reproductor */}
+        <Suspense fallback={<div>Cargando...</div>}>
+          <Routes>
+            <Route path="/" element={<HomePage onAlbumSelect={handleAlbumSelect} />} />
+            <Route path="/song/:id" element={<DetailPage />} />
+            {/* Aquí irían las otras rutas cuando las crees */}
+            {/* <Route path="/favoritos" element={<FavoritesPage />} /> */}
+            {/* <Route path="/category/:id" element={<CategoryPage />} /> */}
+            {/* <Route path="*" element={<NotFoundPage />} /> */}
+          </Routes>
+        </Suspense>
       </main>
-
-      {/* Usamos el operador lógico AND (&&) para renderizado condicional /}
-      {/* Si `currentAlbum` es "truthy", el Player se muestra /}
-      {/* La prop "key" al cambiar, fuerza a React a crear una nueva */}
-      {/* instancia del Player, reseteando su estado  */}
       {currentAlbum && (
-        <Player 
-          key={currentAlbum.id} 
-          album={currentAlbum} 
-          audioUrl={AUDIO_URL} 
+        <Player
+          key={currentAlbum.id}
+          album={currentAlbum}
+          audioUrl={AUDIO_URL}
         />
       )}
-    </>
+    </div>
   );
 }
 
