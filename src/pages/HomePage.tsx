@@ -1,36 +1,20 @@
-// src/pages/HomePage.tsx
-
-import React, { useState } from 'react';
-import type { Album, } from '../data/albums';
-import {mockAlbums } from '../data/albums';
-import SearchBar from '../components/SearchBar';
+import React from 'react';
+import type { Album } from '../data/albums';
 import AlbumList from '../components/music/AlbumList';
+import { mockAlbums } from '../data/albums';
 
-const HomePage: React.FC = () => {
-  const [filteredAlbums, setFilteredAlbums] = useState<Album[]>(mockAlbums);
+interface HomePageProps {
+  onAlbumSelect: (album: Album) => void;
+}
 
-  const handleSearch = (searchTerm: string) => {
-    const lowerCaseTerm = searchTerm.toLowerCase();
-    if (!lowerCaseTerm) {
-      setFilteredAlbums(mockAlbums);
-      return;
-    }
-    const filtered = mockAlbums.filter(album =>
-      album.albumName.toLowerCase().includes(lowerCaseTerm)
-    );
-    setFilteredAlbums(filtered);
-  };
-
+const HomePage: React.FC<HomePageProps> = ({ onAlbumSelect }) => {
   return (
-    <div>
-      <header className="app-header">
-        <h1>MusicBox</h1>
-        <SearchBar onSearch={handleSearch} />
-      </header>
-      <main>
-        <AlbumList albums={filteredAlbums} />
-      </main>
-    </div>
+    <>
+      <AlbumList title="Lanzamientos Populares" albums={mockAlbums} onAlbumSelect={onAlbumSelect} />
+      <AlbumList title="Tus Mixes Más Escuchados" albums={[...mockAlbums].slice(0, 5).reverse()} onAlbumSelect={onAlbumSelect} />
+      <AlbumList title="Similar a Lo-Fi Chillers" albums={mockAlbums.slice(2, 7)} onAlbumSelect={onAlbumSelect} />
+      <AlbumList title="Clásicos del Rock" albums={mockAlbums.slice(4)} onAlbumSelect={onAlbumSelect} />
+    </>
   );
 };
 

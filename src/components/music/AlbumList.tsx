@@ -1,31 +1,23 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
 import styles from './AlbumList.module.css';
+import Container from '../common/Container';
+import AlbumCard from './AlbumCard';
 import type { Album } from '../../data/albums';
 
-interface AlbumListProps {
+interface Props {
+  title: string;
   albums: Album[];
-  onAlbumSelect?: (album: Album) => void;
+  onAlbumSelect: (album: Album) => void;
 }
 
-const AlbumList: React.FC<AlbumListProps> = ({ albums, onAlbumSelect }) => {
+const AlbumList = ({ title, albums, onAlbumSelect }: Props) => {
   return (
-    <div className={styles.grid}>
-      {albums.map(album => (
-        <Link
-          to={`/song/${album.id}`}
-          key={album.id}
-          className={styles.item}
-          onClick={() => onAlbumSelect?.(album)}
-        >
-          <img src={album.cover} alt={album.albumName} className={styles.cover} />
-          <div className={styles.info}>
-            <h3 className={styles.title}>{album.albumName}</h3>
-            <p className={styles.artist}>{album.artist}</p>
-          </div>
-        </Link>
-      ))}
-    </div>
+    <Container title={title}>
+      <div className={styles.grid}>
+        {albums.map((album) => (
+          <AlbumCard key={album.id} album={album} onPlay={onAlbumSelect} />
+        ))}
+      </div>
+    </Container>
   );
 };
 

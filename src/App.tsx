@@ -1,61 +1,49 @@
-import React, { useState, Suspense, lazy } from 'react';
-import { Routes, Route, Link } from 'react-router-dom';
-import './App.css';
+import { useState, Suspense, lazy } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import styles from './App.module.css';
+import Navbar from './components/layout/Navbar';
+import Player from './components/Player';
+import type { Album } from './data/albums';
 
-// 1. Importamos las páginas usando lazy para optimizar la carga
+// Lazy loading para las páginas
 const HomePage = lazy(() => import('./pages/HomePage'));
 const DetailPage = lazy(() => import('./pages/DetailPage'));
-const FavoritesPage = lazy(() => import('./pages/FavoritesPage')); 
-const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));  
+// Aún no hemos creado estas, pero las definimos para el futuro
+// const FavoritesPage = lazy(() => import('./pages/FavoritesPage'));
+// const CategoryPage = lazy(() => import('./pages/CategoryPage'));
+// const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+
+const AUDIO_URL = "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3";
 
 function App() {
-  // 2. "Elevamos el estado" de los favoritos a App.tsx
-  // Así, tanto DetailPage como FavoritesPage pueden acceder a él.
-  const [favorites, setFavorites] = useState<string[]>([]);
+  const [currentAlbum, setCurrentAlbum] = useState<Album | null>(null);
 
-  // 3. Lógica para agregar o quitar un álbum de favoritos
-  const handleToggleFavorite = (albumId: string) => {
-    setFavorites(prevFavorites => {
-      // Si el id ya está, lo quitamos (creando un nuevo array)
-      if (prevFavorites.includes(albumId)) {
-        return prevFavorites.filter(id => id !== albumId);
-      }
-      // Si no está, lo agregamos (creando un nuevo array)
-      return [...prevFavorites, albumId];
-    });
+  const handleAlbumSelect = (album: Album) => {
+    setCurrentAlbum(album);
   };
 
   return (
-    <div className="app-container">
-      {/* 4. Menú de navegación simple y persistente */}
-      <nav className="main-nav">
-        <Link to="/">Inicio</Link>
-        <Link to="/favoritos">Favoritos ({favorites.length})</Link>
-      </nav>
-
-      {/* 5. Suspense para mostrar un "cargando" mientras se descarga el código de la página */}
-      <Suspense fallback={<div className="loading">Cargando página...</div>}>
-        {/* 6. El componente <Routes> decide qué página mostrar según la URL */}
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          
-          <Route 
-            path="/song/:id" 
-            element={<DetailPage favorites={favorites} onToggleFavorite={handleToggleFavorite} />} 
-          />
-          
-          <Route 
-            path="/favoritos" 
-            element={<FavoritesPage favoriteIds={favorites} />} 
-          />
-
-          {/* Puedes agregar la ruta de categoría aquí cuando la crees */}
-          {/* <Route path="/category/:id" element={<CategoryPage />} /> */}
-          
-          {/* Ruta para cualquier otra URL (404 Not Found) */}
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </Suspense>
+    <div className={styles.app}>
+      <Navbar />
+      <main style={{ paddingBottom: '80px' }}> {/* Espacio para el reproductor */}
+        <Suspense fallback={<div>Cargando...</div>}>
+          <Routes>
+            <Route path="/" element={<HomePage onAlbumSelect={handleAlbumSelect} />} />
+            <Route path="/song/:id" element={<DetailPage />} />
+            {/* Aquí irían las otras rutas cuando las crees */}
+            {/* <Route path="/favoritos" element={<FavoritesPage />} /> */}
+            {/* <Route path="/category/:id" element={<CategoryPage />} /> */}
+            {/* <Route path="*" element={<NotFoundPage />} /> */}
+          </Routes>
+        </Suspense>
+      </main>
+      {currentAlbum && (
+        <Player
+          key={currentAlbum.id}
+          album={currentAlbum}
+          audioUrl={AUDIO_URL}
+        />
+      )}
     </div>
   );
 }
