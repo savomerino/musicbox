@@ -1,48 +1,55 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { createAlbum } from '../services/musicService';
+import { musicService } from '../services/musicService';
 
 const CreateAlbumPage: React.FC = () => {
-  const [albumName, setAlbumName] = useState('');
-  const [artist, setArtist] = useState('');
+  // 1. Usar un estado de formulario más completo
+  const [formState, setFormState] = useState({
+    title: '',
+    artist: '',
+    album: '',
+    year: new Date().getFullYear(),
+  });
+
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const { mutate, isLoading, isError, error } = useMutation({
-    mutationFn: createAlbum,
+  const { mutate, isPending, isError, error } = useMutation({ // isPending es el nuevo nombre para isLoading en v5
+    mutationFn: musicService.createSong, // 👈 2. Llamar a la función correcta
     onSuccess: () => {
-      // Invalida la caché de 'albums' para que la lista se actualice
-      queryClient.invalidateQueries({ queryKey: ['albums'] });
-      navigate('/'); // Redirige al inicio tras el éxito
+      queryClient.invalidateQueries({ queryKey: ['songs'] });
+      navigate('/');
     },
   });
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormState(prev => ({ ...prev, [name]: value }));
+  };
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    mutate({ albumName, artist, id: Date.now().toString() /* otros campos necesarios */ });
+    // 3. Enviar el objeto con las propiedades correctas
+    mutate({
+      title: formState.title,
+      artist: formState.artist,
+      album: formState.album,
+      year: Number(formState.year),
+    });
   };
 
   return (
-    <div style={{ color: 'white', padding: '20px' }}>
-      <h2>Crear Nuevo Álbum</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={albumName}
-          onChange={(e) => setAlbumName(e.target.value)}
-          placeholder="Nombre del Álbum"
-          required
-        />
-        <input
-          type="text"
-          value={artist}
-          onChange={(e) => setArtist(e.target.value)}
-          placeholder="Artista"
-          required
-        />
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Guardando...' : 'Guardar Álbum'}
+    <div style={{ color: 'white', padding: '20px', maxWidth: '500px', margin: 'auto' }}>
+      <h2>Crear Nueva Canción</h2>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+        <input name="title" value={formState.title} onChange={handleChange} placeholder="Título de la canción" required />
+        <input name="artist" value={formState.artist} onChange={handleChange} placeholder="Artista" required />
+        <input name="album" value={formState.album} onChange={handleChange} placeholder="Nombre del Álbum" required />
+        <input name="year" type="number" value={formState.year} onChange={handleChange} placeholder="Año" required />
+        
+        <button type="submit" disabled={isPending}>
+          {isPending ? 'Guardando...' : 'Guardar Canción'}
         </button>
         {isError && <p style={{ color: 'red' }}>Error: {(error as Error).message}</p>}
       </form>

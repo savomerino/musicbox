@@ -1,25 +1,24 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { Album } from '../data/albums';
-import { getAlbums } from '../services/musicService'; // Importar desde el servicio
+import type { Song } from '../services/db'; // 👈 1. Importar el tipo correcto desde db.ts
+import { musicService } from '../services/musicService'; // 👈 2. Importar el servicio
 import AlbumList from '../components/music/AlbumList';
 
 interface HomePageProps {
-  onAlbumSelect: (album: Album) => void;
+  onAlbumSelect: (album: Song) => void; // 👈 3. Usar el tipo Song
   favorites: string[];
   onToggleFavorite: (albumId: string) => void;
 }
 
 const HomePage: React.FC<HomePageProps> = ({ onAlbumSelect, favorites, onToggleFavorite }) => {
-  // Usar useQuery para obtener los álbumes
-  const { data: albums, isLoading, isError, error } = useQuery({
-    queryKey: ['albums'], // Clave única para esta consulta
-    queryFn: getAlbums,  // Función que obtiene los datos del servicio
+  // Usar el nombre correcto de la función: musicService.getAllSongs
+  const { data: songs, isLoading, isError, error } = useQuery({
+    queryKey: ['songs'], // Renombramos la queryKey para mayor claridad
+    queryFn: musicService.getAllSongs, // 👈 4. Llamar a la función correcta del servicio
   });
 
-  // Requisito 3: Mostrar estado de carga/error
   if (isLoading) {
-    return <div style={{ color: 'white', textAlign: 'center', padding: '50px' }}>Cargando álbumes...</div>;
+    return <div style={{ color: 'white', textAlign: 'center', padding: '50px' }}>Cargando canciones...</div>;
   }
 
   if (isError) {
@@ -30,12 +29,11 @@ const HomePage: React.FC<HomePageProps> = ({ onAlbumSelect, favorites, onToggleF
     <>
       <AlbumList
         title="Lanzamientos Populares"
-        albums={albums} // Usar los datos de la query
+        albums={songs || []} // 👈 5. Pasar los datos de la query (ahora son 'songs')
         onAlbumSelect={onAlbumSelect}
         favorites={favorites}
         onToggleFavorite={onToggleFavorite}
       />
-      {/* Puedes seguir mostrando otras listas si el servicio las devuelve o filtrando los resultados */}
     </>
   );
 };
