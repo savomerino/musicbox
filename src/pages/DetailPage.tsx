@@ -1,14 +1,22 @@
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { mockAlbums } from '../data/albums';
+import { useQuery } from '@tanstack/react-query';
+import { getAlbum } from '../services/musicService'; // Importar del servicio
 
 const DetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const album = mockAlbums.find(a => a.id === id);
 
-  if (!album) {
+  // Obtener los datos del álbum específico
+  const { data: album, isLoading, isError } = useQuery({
+    queryKey: ['album', id], // La clave debe ser única por álbum
+    queryFn: () => getAlbum(id!),
+    enabled: !!id, // La consulta solo se ejecutará si el 'id' existe
+  });
+
+  if (isLoading) return <div style={{ color: 'white' }}>Cargando...</div>;
+  if (isError || !album) {
     return (
-      <div>
+      <div style={{ color: 'white' }}>
         <h2>Álbum no encontrado</h2>
         <Link to="/">Volver al inicio</Link>
       </div>
@@ -23,7 +31,6 @@ const DetailPage: React.FC = () => {
         <div>
           <h1>{album.albumName}</h1>
           <h2>{album.artist}</h2>
-          {/* Esta línea ahora funcionará */}
           <p>Categoría: {album.category}</p>
           <p>Publicado: {album.publicationDate}</p>
         </div>

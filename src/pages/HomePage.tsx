@@ -1,9 +1,9 @@
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import type { Album } from '../data/albums';
-import {mockAlbums } from '../data/albums';
+import { getAlbums } from '../services/musicService'; // Importar desde el servicio
 import AlbumList from '../components/music/AlbumList';
 
-// Define las props que la página recibe
 interface HomePageProps {
   onAlbumSelect: (album: Album) => void;
   favorites: string[];
@@ -11,37 +11,31 @@ interface HomePageProps {
 }
 
 const HomePage: React.FC<HomePageProps> = ({ onAlbumSelect, favorites, onToggleFavorite }) => {
+  // Usar useQuery para obtener los álbumes
+  const { data: albums, isLoading, isError, error } = useQuery({
+    queryKey: ['albums'], // Clave única para esta consulta
+    queryFn: getAlbums,  // Función que obtiene los datos del servicio
+  });
+
+  // Requisito 3: Mostrar estado de carga/error
+  if (isLoading) {
+    return <div style={{ color: 'white', textAlign: 'center', padding: '50px' }}>Cargando álbumes...</div>;
+  }
+
+  if (isError) {
+    return <div style={{ color: 'red', textAlign: 'center', padding: '50px' }}>Error al cargar: {error.message}</div>;
+  }
+
   return (
     <>
-      {/* Pasa las props a cada AlbumList */}
-      <AlbumList 
-        title="Lanzamientos Populares" 
-        albums={mockAlbums} 
-        onAlbumSelect={onAlbumSelect} 
-        favorites={favorites} 
-        onToggleFavorite={onToggleFavorite} 
+      <AlbumList
+        title="Lanzamientos Populares"
+        albums={albums} // Usar los datos de la query
+        onAlbumSelect={onAlbumSelect}
+        favorites={favorites}
+        onToggleFavorite={onToggleFavorite}
       />
-      <AlbumList 
-        title="Tus Mixes Más Escuchados" 
-        albums={[...mockAlbums].slice(0, 5).reverse()} 
-        onAlbumSelect={onAlbumSelect} 
-        favorites={favorites} 
-        onToggleFavorite={onToggleFavorite} 
-      />
-      <AlbumList 
-        title="Similar a Lo-Fi Chillers" 
-        albums={mockAlbums.slice(2, 7)} 
-        onAlbumSelect={onAlbumSelect} 
-        favorites={favorites} 
-        onToggleFavorite={onToggleFavorite} 
-      />
-      <AlbumList 
-        title="Clásicos del Rock" 
-        albums={mockAlbums.slice(4)} 
-        onAlbumSelect={onAlbumSelect} 
-        favorites={favorites} 
-        onToggleFavorite={onToggleFavorite} 
-      />
+      {/* Puedes seguir mostrando otras listas si el servicio las devuelve o filtrando los resultados */}
     </>
   );
 };

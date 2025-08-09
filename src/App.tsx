@@ -8,6 +8,8 @@ import type { Album } from './data/albums';
 const HomePage = lazy(() => import('./pages/HomePage'));
 const DetailPage = lazy(() => import('./pages/DetailPage'));
 const FavoritesPage = lazy(() => import('./pages/FavoritesPage'));
+const CreateAlbumPage = lazy(() => import('./pages/CreateAlbumPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 const AUDIO_URL = "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3";
 
@@ -44,6 +46,8 @@ function App() {
               path="/favoritos" 
               element={<FavoritesPage favorites={favorites} onAlbumSelect={handleAlbumSelect} onToggleFavorite={handleToggleFavorite} />} 
             />
+            <Route path="/create" element={<CreateAlbumPage />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
       </main>
