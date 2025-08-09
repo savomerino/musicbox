@@ -23,6 +23,7 @@ const DetailPage: React.FC = () => {
         <div>
           <h1>{album.albumName}</h1>
           <h2>{album.artist}</h2>
+          {/* Esta línea ahora funcionará */}
           <p>Categoría: {album.category}</p>
           <p>Publicado: {album.publicationDate}</p>
         </div>

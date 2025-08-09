@@ -7,15 +7,26 @@ interface Props {
   title: string;
   albums: Album[];
   onAlbumSelect: (album: Album) => void;
+  favorites: string[]; // Lista de IDs favoritos
+  onToggleFavorite: (albumId: string) => void; // Función para alternar
 }
 
-const AlbumList = ({ title, albums, onAlbumSelect }: Props) => {
+const AlbumList = ({ title, albums, onAlbumSelect, favorites, onToggleFavorite }: Props) => {
   return (
     <Container title={title}>
       <div className={styles.grid}>
-        {albums.map((album) => (
-          <AlbumCard key={album.id} album={album} onPlay={onAlbumSelect} />
-        ))}
+        {albums.map((album) => {
+          const isFavorite = favorites.includes(album.id);
+          return (
+            <AlbumCard
+              key={album.id}
+              album={album}
+              onPlay={onAlbumSelect}
+              isFavorite={isFavorite}
+              onToggleFavorite={onToggleFavorite}
+            />
+          );
+        })}
       </div>
     </Container>
   );
