@@ -1,25 +1,47 @@
 import { Link } from 'react-router-dom';
 import styles from './AlbumCard.module.css';
-import type { Album } from '../../data/albums';
+import type { Song } from '../../services/db'; // 👈 1. Importar tipo 'Song'
 
 interface Props {
-  album: Album;
-  onPlay: (album: Album) => void; // Función para reproducir
+  album: Song; // 👈 2. Espera un prop 'album' de tipo 'Song'
+  onPlay: (album: Song) => void;
+  isFavorite: boolean;
+  onToggleFavorite: (albumId: string) => void;
 }
 
-const AlbumCard = ({ album, onPlay }: Props) => {
+const AlbumCard = ({ album, onPlay, isFavorite, onToggleFavorite }: Props) => {
+  const handlePlayClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onPlay(album);
+  };
+
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // 3. El ID de la canción es un número, lo convertimos a string
+    onToggleFavorite(String(album.id)); 
+  };
+  
+  // 👇 4. Renderizar las propiedades correctas
   return (
     <div className={styles.card}>
-      <Link to={`/song/${album.id}`}>
-        <img src={album.cover} alt={`Cover of ${album.albumName}`} className={styles.cover} />
-      </Link>
-      <div>
-        <Link to={`/song/${album.id}`} style={{ textDecoration: 'none' }}>
-          <h3 className={styles.title}>{album.albumName}</h3>
+      <div style={{ position: 'relative' }}>
+        <Link to={`/song/${album.id}`}>
+          <img 
+            src={album.cover} 
+            alt={`Cover of ${album.album}`} 
+            className={styles.cover} 
+          />
         </Link>
-        <p className={styles.artist}>{album.artist}</p>
-        <p className={styles.date}>{album.publicationDate}</p>
-        <button className={styles.playButton} onClick={() => onPlay(album)}>▶</button>
+        <button className={styles.playButton} onClick={handlePlayClick}>▶</button>
+      </div>
+      <div className={styles.infoContainer}>
+        <div>
+          <h3 className={styles.title}>{album.title}</h3>
+          <p className={styles.artist}>{album.artist}</p>
+        </div>
+        <button onClick={handleFavoriteClick} className={styles.favoriteButton}>
+          {isFavorite ? '❤️' : '🤍'}
+        </button>
       </div>
     </div>
   );
