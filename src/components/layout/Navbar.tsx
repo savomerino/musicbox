@@ -8,6 +8,7 @@ const Navbar = () => {
       <div>
         <Link to="/" className={styles.navLink}>Inicio</Link>
         <Link to="/favoritos" className={styles.navLink}>Favoritos</Link> {/* Link a Favoritos */}
+        <Link to="/create" className={styles.navLink}>Nueva Canción</Link> {/* Link a Nueva Canción */}
       </div>
     </nav>
   );
