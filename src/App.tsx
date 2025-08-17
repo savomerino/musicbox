@@ -51,7 +51,7 @@ function App() {
             {/* 👇 Aquí también */}
             <Route 
               path="/favoritos" 
-              element={<HomePage onSongSelect={handleSongSelect} favorites={favorites} onToggleFavorite={handleToggleFavorite} />} 
+              element={<FavoritesPage onSongSelect={handleSongSelect} favorites={favorites} onToggleFavorite={handleToggleFavorite} />} 
             />
             <Route path="/create" element={<CreateAlbumPage />} />
             <Route path="*" element={<NotFoundPage />} />

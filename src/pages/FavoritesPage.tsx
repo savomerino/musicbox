@@ -2,15 +2,15 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { Song } from '../services/db';
 import { musicService } from '../services/musicService';
-import AlbumList from '../components/music/AlbumList';
+import SongList from '../components/music/SongList';
 
 interface FavoritesPageProps {
-  onAlbumSelect: (album: Song) => void;
+  onSongSelect: (song: Song) => void;
   favorites: string[];
-  onToggleFavorite: (albumId: string) => void;
+  onToggleFavorite: (songId: string) => void;
 }
 
-const FavoritesPage: React.FC<FavoritesPageProps> = ({ onAlbumSelect, favorites, onToggleFavorite }) => {
+const FavoritesPage: React.FC<FavoritesPageProps> = ({ onSongSelect, favorites, onToggleFavorite }) => {
   // 1. Obtener TODAS las canciones desde el servicio
   const { data: allSongs, isLoading, isError } = useQuery({
     queryKey: ['songs'], // Usamos la misma key, React Query devolverá los datos cacheados
@@ -18,7 +18,7 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ onAlbumSelect, favorites,
   });
 
   // 2. Filtrar las canciones para mostrar solo los favoritos
-  const favoriteAlbums = allSongs?.filter(song => favorites.includes(String(song.id))) || [];
+  const favoriteSongs = allSongs?.filter(song => favorites.includes(String(song.id))) || [];
 
   if (isLoading) {
     return <div style={{ color: 'white', textAlign: 'center', padding: '50px' }}>Cargando favoritos...</div>;
@@ -30,11 +30,11 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ onAlbumSelect, favorites,
 
   return (
     <>
-      {favoriteAlbums.length > 0 ? (
-        <AlbumList 
+      {favoriteSongs.length > 0 ? (
+        <SongList 
           title="Tus Favoritos" 
-          albums={favoriteAlbums} 
-          onAlbumSelect={onAlbumSelect} 
+          songs={favoriteSongs} 
+          onSongSelect={onSongSelect} 
           favorites={favorites} 
           onToggleFavorite={onToggleFavorite} 
         />
