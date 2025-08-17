@@ -1,21 +1,29 @@
-import React from 'react';
+import React, { useState, useDeferredValue } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { Song } from '../services/db'; // 👈 1. Importar el tipo correcto desde db.ts
-import { musicService } from '../services/musicService'; // 👈 2. Importar el servicio
-import AlbumList from '../components/music/AlbumList';
+import type { Song } from '../services/db';
+import { musicService } from '../services/musicService';
+import SongList from '../components/music/SongList';
+import SearchBar from '../components/SearchBar';
 
 interface HomePageProps {
-  onAlbumSelect: (album: Song) => void; // 👈 3. Usar el tipo Song
+  onSongSelect: (song: Song) => void;
   favorites: string[];
-  onToggleFavorite: (albumId: string) => void;
+  onToggleFavorite: (songId: string) => void;
 }
 
-const HomePage: React.FC<HomePageProps> = ({ onAlbumSelect, favorites, onToggleFavorite }) => {
-  // Usar el nombre correcto de la función: musicService.getAllSongs
+const HomePage: React.FC<HomePageProps> = ({ onSongSelect, favorites, onToggleFavorite }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const deferredSearchTerm = useDeferredValue(searchTerm);
+
   const { data: songs, isLoading, isError, error } = useQuery({
-    queryKey: ['songs'], // Renombramos la queryKey para mayor claridad
-    queryFn: musicService.getAllSongs, // 👈 4. Llamar a la función correcta del servicio
+    queryKey: ['songs'],
+    queryFn: musicService.getAllSongs,
   });
+
+  const filteredSongs = songs?.filter(song =>
+    song.title.toLowerCase().includes(deferredSearchTerm.toLowerCase()) ||
+    song.artist.toLowerCase().includes(deferredSearchTerm.toLowerCase())
+  );
 
   if (isLoading) {
     return <div style={{ color: 'white', textAlign: 'center', padding: '50px' }}>Cargando canciones...</div>;
@@ -27,10 +35,13 @@ const HomePage: React.FC<HomePageProps> = ({ onAlbumSelect, favorites, onToggleF
 
   return (
     <>
-      <AlbumList
+      <div style={{ padding: '1rem 1.5rem' }}>
+        <SearchBar onSearch={setSearchTerm} />
+      </div>
+      <SongList
         title="Lanzamientos Populares"
-        albums={songs || []} // 👈 5. Pasar los datos de la query (ahora son 'songs')
-        onAlbumSelect={onAlbumSelect}
+        songs={filteredSongs || []}
+        onSongSelect={onSongSelect}
         favorites={favorites}
         onToggleFavorite={onToggleFavorite}
       />
