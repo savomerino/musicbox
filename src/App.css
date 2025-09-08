@@ -34,7 +34,13 @@
 }
 
 .card {
-  padding: 2em;
+  background-color: #262626;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.3s;
+}
+.card:hover {
+  background-color: #404040;
 }
 
 .read-the-docs {
@@ -106,3 +112,66 @@
   letter-spacing: 2px;
 }
 
+.cover {
+  width: 100%;
+  border-radius: 0.375rem;
+  margin-bottom: 1rem;
+  display: block; /* Asegura que el Link se comporte bien */
+}
+.title {
+  color: white;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+.artist {
+  font-size: 0.875rem;
+  color: #a3a3a3;
+  margin: 0.25rem 0 0 0;
+}
+
+/* Contenedor para la información y el botón de favoritos */
+.infoContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+/* Botón de Play sobre la imagen */
+.playButton {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 0.5rem;
+  background-color: #22c55e;
+  color: black;
+  border: none;
+  border-radius: 9999px;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.25rem;
+  opacity: 0; /* Oculto por defecto */
+  transform: translateY(10px);
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.card:hover .playButton {
+  opacity: 1; /* Aparece al hacer hover en la tarjeta */
+  transform: translateY(0);
+}
+
+/* Botón de favoritos al lado del texto */
+.favoriteButton {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 1.5rem;
+  padding: 0;
+  margin-left: 0.5rem;
+}

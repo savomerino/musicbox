@@ -1,15 +1,26 @@
 import React, { useState, useRef, useEffect } from 'react';
-import type { Album } from '../data/albums';
+import type { Song } from '../services/db'; // 👈 1. Asegurarse que importa el tipo 'Song'
 
 interface PlayerProps {
-  album: Album;
+  song: Song; // 👈 2. La prop se llama 'song' y es de tipo 'Song'
   audioUrl: string;
 }
 
-const Player: React.FC<PlayerProps> = ({ album, audioUrl }) => {
+const Player: React.FC<PlayerProps> = ({ song, audioUrl }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    // Cuando la canción cambia, resetea y reproduce
+    const audio = audioRef.current;
+    if (audio) {
+      audio.src = audioUrl; // Asigna la nueva URL de audio
+      audio.load();
+      audio.play().catch(error => console.log("Error al reproducir audio:", error));
+      setIsPlaying(true);
+    }
+  }, [song, audioUrl]); // Se ejecuta cada vez que 'song' o 'audioUrl' cambian
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -33,7 +44,8 @@ const Player: React.FC<PlayerProps> = ({ album, audioUrl }) => {
       audioRef.current.currentTime = (Number(e.target.value) * duration) / 100;
     }
   };
-
+  
+  // 👇 3. Renderiza las propiedades correctas del objeto 'song'
   return (
     <div style={styles.playerContainer}>
       <audio
@@ -43,10 +55,10 @@ const Player: React.FC<PlayerProps> = ({ album, audioUrl }) => {
         onLoadedData={() => audioRef.current?.play()}
         onEnded={() => setIsPlaying(false)}
       />
-      <img src={album.cover} alt={album.albumName} style={styles.albumCover} />
+      <img src={song.cover} alt={song.album} style={styles.albumCover} />
       <div style={styles.songInfo}>
-        <strong>{album.albumName}</strong>
-        <small>{album.artist}</small>
+        <strong>{song.title}</strong>
+        <small>{song.artist}</small>
       </div>
       <button onClick={togglePlayPause} style={styles.playButton}>{isPlaying ? '❚❚' : '▶'}</button>
       <input
@@ -59,7 +71,7 @@ const Player: React.FC<PlayerProps> = ({ album, audioUrl }) => {
   );
 };
 
-// Estilos en línea para simplicidad
+// Estilos en línea para simplicidad (esta parte estaba incompleta antes)
 const styles: { [key: string]: React.CSSProperties } = {
   playerContainer: {
     position: 'fixed',
@@ -71,6 +83,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     alignItems: 'center',
     padding: '10px 20px',
+    boxSizing: 'border-box',
     borderTop: '1px solid #282828'
   },
   albumCover: { width: '50px', height: '50px', marginRight: '15px' },
